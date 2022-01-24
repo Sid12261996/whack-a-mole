@@ -1,7 +1,7 @@
 const groounds = document.querySelectorAll('.ground');
 const moles = document.querySelectorAll('.mole');
 let interval;
-let timerInSec = 5
+let timerInSec = 15
 let score = 0;
 
 function startGame() {
@@ -19,7 +19,7 @@ function endGame() {
 }
 
 function saveScore() {
-    localStorage.setItem('hScore', JSON.stringify({ score: score, timerInSec: timerInSec }))
+    localStorage.setItem('hScore', JSON.stringify({ score: score, timerInSec: timerInSec + 1 }))
 }
 
 /**
@@ -31,13 +31,18 @@ function saveScore() {
 function randomeNumberGenerator(min, max) {
     return Math.round(Math.random() * (max - min) + min);
 }
-
+let previousIndex;
 function peep() {
     clearInterval(interval);
     const moleIndex = randomeNumberGenerator(0, moles.length - 1);
     console.log('mole to peep: ', moleIndex);
+    if(previousIndex === moleIndex){
+        console.log('same index so we are peeping again');
+        peep();
+        return;
+    }
     moles[moleIndex].classList.add('up');
-
+    previousIndex = moleIndex;
     interval = setInterval(() => {
         moles[moleIndex].classList.remove('up');
         peep();
@@ -71,20 +76,24 @@ function setUpMoles() {
 
 function cleanupMoles() {
     moles.forEach(x => x.removeEventListener('click', onRemoveClick));
+    moles.forEach(x => x.classList.remove('up'));
 }
 
 function onClickMole(e) {
     e.preventDefault();
-    console.log(e);
     if (!e.isTrusted) {
         console.log('cheater!');
+    }
+    if (timerInSec <= 0) {
+        console.log('Ahh! the game is over!');
+        return;
     }
     ++score;
     console.log('caught a mole');
     setScore();
 }
 
-function onRemoveClick(e){
+function onRemoveClick(e) {
     console.log('Ah! the game is over!');
 }
 
